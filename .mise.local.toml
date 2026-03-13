@@ -1,0 +1,59 @@
+[tools]
+node = "22"
+python = "3.10"
+zig="0.15.2"
+"aqua:WebAssembly/binaryen" = "latest"
+"pipx:git+https://github.com/Transia-RnD/xrpld-network-gen.git" = "main"
+
+[tasks.wasm-opt]
+run=["""
+wasm-opt \
+  --shrink-level=100000000 \
+  --coalesce-locals-learning \
+  --vacuum \
+  --merge-blocks \
+  --merge-locals \
+  --flatten \
+  --ignore-implicit-traps \
+  -ffm \
+  --const-hoisting \
+  --code-folding \
+  --code-pushing \
+  --dae-optimizing \
+  --dce \
+  --simplify-globals-optimizing \
+  --simplify-locals-nonesting \
+  --reorder-locals \
+  --rereloop \
+  --precompute-propagate \
+  --local-cse \
+  --remove-unused-brs \
+  --memory-packing \
+  -c \
+  --avoid-reinterprets \
+  -O3 -o "$OUTPUT" "$OUTPUT"
+"""]
+
+[tasks.build]
+run = ["""
+zig cc --target=wasm32-freestanding -Oz -nostdlib \
+  -Wl,--no-entry \
+  -Wl,--export=hook,--export=cbak \
+  -Wl,-z,stack-size=65536 \
+  -Wl,--max-memory=524288 \
+  -Wl,--strip-all \
+  -I./contracts/utils \
+  -Wno-pointer-to-int-cast \
+  -Wno-int-conversion \
+  -Wl,--import-symbols \
+  -o "$OUTPUT" "$INPUT"
+""",
+"""
+mise wasm-opt
+"""]
+alias = "b"
+
+[env]
+XAHAU_VERSION = "2026.3.12-HEAD+2970"
+INPUT = "contracts/index.c"
+OUTPUT = "build/index.wasm"

@@ -4,20 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "c2wasm-cli contracts/index.c build/ --headers contracts",
+    "build": "mise build",
     "test": "LOG_LEVEL=error VITE_CJS_TRACE=true vitest",
-    "xrpld:start": "xrpld-netgen up:standalone --protocol xahau --version 2025.12.1-release+2609",
-    "xrpld:stop": "xrpld-netgen down:standalone --protocol xahau --version 2025.12.1-release+2609",
-    "trace": "docker logs --tail 100 -f xahau 2>&1 | cut -d ' ' -f 5- | grep -a -E 'Publishing ledger|HookInfo|HookTrace|HookError|HookEmit|preclaim result'"
+    "xrpld:start": "xrpld-netgen up:standalone --protocol xahau --version $XAHAU_VERSION",
+    "xrpld:stop": "xrpld-netgen down:standalone --protocol xahau --version $XAHAU_VERSION",
+    "trace": "docker logs --tail 100 -f xahau 2>&1 | cut -d ' ' -f 5- | grep -a -E 'Publishing ledger|HookInfo|HookTrace|HookError|HookEmit|preclaim result'",
+    "trace:raw": "docker logs --tail 100 -f xahau"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@transia/hooks-toolkit": "^2.0.0",
-    "@xahau/hooks-cli": "^2.0.3",
+    "@transia/hooks-toolkit": "npm:@tequ/hooks-toolkit@2.0.0-peer-dep",
     "dotenv": "^16.4.1",
-    "xahau": "^4.0.3"
+    "xahau": "^4.0.3",
+    "xahau-binary-codec": "^2.1.3",
+    "xahau-keypairs": "^2.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.5.3",

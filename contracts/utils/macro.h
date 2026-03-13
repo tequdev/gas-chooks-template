@@ -46,12 +46,6 @@
     trace((uint32_t)(#v), (uint32_t)(sizeof(#v) - 1), (uint32_t)(v),           \
           sizeof(v), 0);
 
-// hook developers should use this guard macro, simply GUARD(<maximum
-// iterations>)
-#define GUARD(maxiter) _g((1ULL << 31U) + __LINE__, (maxiter) + 1)
-#define GUARDM(maxiter, n)                                                     \
-  _g(((1ULL << 31U) + (__LINE__ << 16) + n), (maxiter) + 1)
-
 #define SBUF(str) (uint32_t)(str), sizeof(str)
 #define SVAR(x) &x, sizeof(x)
 
@@ -70,7 +64,7 @@
   int out_len = 0;                                                             \
   {                                                                            \
     int i = 0;                                                                 \
-    for (; GUARDM(sizeof(str), 1), i < sizeof(str); ++i)                       \
+    for (; i < sizeof(str); ++i)                       \
       (buf)[i] = str[i];                                                       \
     if ((buf)[sizeof(str) - 1] == 0)                                           \
       i--;                                                                     \
@@ -79,7 +73,7 @@
     uint64_t unsigned_num = (uint64_t)((num) < 0 ? (num) * -1 : (num));        \
     uint64_t j = 10000000000000000000ULL;                                      \
     int start = 1;                                                             \
-    for (; GUARDM(20, 2), unsigned_num > 0 && j > 0; j /= 10) {                \
+    for (; unsigned_num > 0 && j > 0; j /= 10) {                \
       unsigned char digit = (unsigned_num / j) % 10;                           \
       if (digit == 0 && start)                                                 \
         continue;                                                              \
@@ -96,7 +90,7 @@
   {                                                                            \
     unsigned char *buf = buff;                                                 \
     int i = 0;                                                                 \
-    for (; GUARDM(sizeof(str), 1), i < sizeof(str); ++i)                       \
+    for (; i < sizeof(str); ++i)                       \
       (buf)[i] = str[i];                                                       \
     if ((buf)[sizeof(str) - 1] == 0)                                           \
       i--;                                                                     \
@@ -105,7 +99,7 @@
     uint64_t unsigned_num = (uint64_t)((num) < 0 ? (num) * -1 : (num));        \
     uint64_t j = 10000000000000000000ULL;                                      \
     int start = 1;                                                             \
-    for (; GUARDM(20, 2), unsigned_num > 0 && j > 0; j /= 10) {                \
+    for (; unsigned_num > 0 && j > 0; j /= 10) {                \
       unsigned char digit = (unsigned_num / j) % 10;                           \
       if (digit == 0 && start)                                                 \
         continue;                                                              \
@@ -115,7 +109,7 @@
     buf += i;                                                                  \
     out_len += i;                                                              \
     i = 0;                                                                     \
-    for (; GUARDM(sizeof(str2), 3), i < sizeof(str2); ++i)                     \
+    for (; i < sizeof(str2); ++i)                     \
       (buf)[i] = str2[i];                                                      \
     if ((buf)[sizeof(str2) - 1] == 0)                                          \
       i--;                                                                     \
@@ -124,7 +118,7 @@
     unsigned_num = (uint64_t)((num2) < 0 ? (num2) * -1 : (num2));              \
     j = 10000000000000000000ULL;                                               \
     start = 1;                                                                 \
-    for (; GUARDM(20, 4), unsigned_num > 0 && j > 0; j /= 10) {                \
+    for (; unsigned_num > 0 && j > 0; j /= 10) {                \
       unsigned char digit = (unsigned_num / j) % 10;                           \
       if (digit == 0 && start)                                                 \
         continue;                                                              \
@@ -137,7 +131,7 @@
 
 #define CLEARBUF(b)                                                            \
   {                                                                            \
-    for (int x = 0; GUARD(sizeof(b)), x < sizeof(b); ++x)                      \
+    for (int x = 0; x < sizeof(b); ++x)                      \
       b[x] = 0;                                                                \
   }
 
@@ -182,13 +176,6 @@
 // provide n >= 1 to indicate how many times the macro will be hit on the line
 // of code e.g. if it is in a loop that loops 10 times n = 10
 
-#define BUFFER_EQUAL_GUARD(output, buf1, buf1len, buf2, buf2len, n)            \
-  {                                                                            \
-    output = ((buf1len) == (buf2len) ? 1 : 0);                                 \
-    for (int x = 0; GUARDM((buf2len) * (n), 1), output && x < (buf2len); ++x)  \
-      output = *(((uint8_t *)(buf1)) + x) == *(((uint8_t *)(buf2)) + x);       \
-  }
-
 #define BUFFER_SWAP(x, y)                                                      \
   {                                                                            \
     uint8_t *z = x;                                                            \
@@ -199,7 +186,7 @@
 #define ACCOUNT_COMPARE(compare_result, buf1, buf2)                            \
   {                                                                            \
     compare_result = 0;                                                        \
-    for (int i = 0; GUARD(20), i < 20; ++i) {                                  \
+    for (int i = 0; i < 20; ++i) {                                  \
       if (buf1[i] > buf2[i]) {                                                 \
         compare_result = 1;                                                    \
         break;                                                                 \
@@ -209,15 +196,6 @@
       }                                                                        \
     }                                                                          \
   }
-
-#define BUFFER_EQUAL_STR_GUARD(output, buf1, buf1len, str, n)                  \
-  BUFFER_EQUAL_GUARD(output, buf1, buf1len, str, (sizeof(str) - 1), n)
-
-#define BUFFER_EQUAL_STR(output, buf1, buf1len, str)                           \
-  BUFFER_EQUAL_GUARD(output, buf1, buf1len, str, (sizeof(str) - 1), 1)
-
-#define BUFFER_EQUAL(output, buf1, buf2, compare_len)                          \
-  BUFFER_EQUAL_GUARD(output, buf1, compare_len, buf2, compare_len, 1)
 
 #define UINT8_TO_BUF(buf_raw, i)                                               \
   {                                                                            \

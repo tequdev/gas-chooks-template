@@ -7,9 +7,6 @@
 extern "C" {
 #endif
 
-extern int32_t __attribute__((noduplicate))
-_g(uint32_t guard_id, uint32_t maxiter);
-
 extern int64_t
 accept(uint32_t read_ptr, uint32_t read_len, int64_t error_code);
 
