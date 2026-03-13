@@ -41,6 +41,10 @@ chooks-template/
 
 ## Usage
 
+### Install mise
+
+see: https://mise.jdx.dev/getting-started.html
+
 ### Building Hooks
 
 Compile C language source code to WASM:
@@ -83,6 +87,10 @@ View hook execution logs in real-time:
 
 ```bash
 pnpm trace
+```
+
+```bash
+pnpm trace:raw
 ```
 
 ## Development
