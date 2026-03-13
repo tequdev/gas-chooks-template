@@ -33,6 +33,12 @@ import { sign } from 'xahau-keypairs'
 
 const namespace = 'namespace'
 
+declare module 'xahau' {
+  interface BaseTransaction {
+    HookGas?: number
+  }
+}
+
 describe('test', () => {
   let testContext: XrplIntegrationTestContext
   let definitions: XrplDefinitions
@@ -78,8 +84,7 @@ describe('test', () => {
   })
 
   const autofill = async (tx: SubmittableTransaction, hookGas: number) => {
-    let returnTx
-    returnTx = await testContext.client.autofill(tx)
+    const returnTx = await testContext.client.autofill(tx)
     returnTx.SigningPubKey = ''
     returnTx.HookGas = hookGas
     const fee = await getFeeEstimateXrp(
@@ -101,14 +106,15 @@ describe('test', () => {
     hookGas: number,
     wallet: Wallet,
   ) => {
-    let returnTx: any
+    let returnTx: SubmittableTransaction
     returnTx = await autofill(tx, hookGas)
     returnTx = signTransaction(returnTx, wallet)
     const submitResponse = await testContext.client.request({
       command: 'submit',
       tx_blob: encode(returnTx, definitions),
     })
-    await testContext.client.request({ command: 'ledger_accept' })
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    await testContext.client.request({ command: 'ledger_accept' } as any)
     const response = await testContext.client.request({
       command: 'tx',
       transaction: submitResponse.result.tx_json.hash,
@@ -122,7 +128,7 @@ describe('test', () => {
       Account: testContext.alice.address,
       Fee: '0',
     }
-    const response = await signAndSubmit(tx, 10000, testContext.alice)
+    const response = await signAndSubmit(tx, 1000, testContext.alice)
 
     console.log(response.meta)
     expect(response.meta).toHaveProperty('HookExecutions')
